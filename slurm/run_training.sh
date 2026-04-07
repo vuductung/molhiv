@@ -10,12 +10,11 @@
 #SBATCH -e logs/%x_%j.err        # Stderr file: jobname_jobid.err
 
 # Load modules - check what's available with 'module avail'
-module load python
-module load cuda
+module load anaconda/3/2023.03
+module load cuda/12.6
 
 # Activate your conda/venv environment
-conda activate dlbio_arm64
-source ~/venvs/your_env/bin/activate
+source activate molhiv
 
 # Run the training script
 cd ~/projects/molhiv/scripts

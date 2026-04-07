@@ -68,7 +68,6 @@ metrics = [
 criterion = nn.CrossEntropyLoss(weight=class_weights)
 
 import mlflow
-# mlflow.set_tracking_uri("http://127.0.0.1:5000")
 mlflow.set_tracking_uri("file:///home/dtvu/projects/molhiv/mlruns")
 mlflow.set_experiment("Molhiv-GCN-HIV-binding")
 with mlflow.start_run(run_name="testing-mps"):

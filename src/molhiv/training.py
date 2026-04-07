@@ -49,7 +49,7 @@ def predict(model: GCN, dataloader: DataLoader, device:str = None):
         outs.append(out)
         y = batch.y.flatten().to(device)
         ys.append(y)
-    return torch.cat(outs, dim=0), torch.cat(ys)
+    return torch.cat(outs, dim=0).cpu(), torch.cat(ys).cpu()
 
 def train_val(model: GCN, train_loader: DataLoader, val_loader: DataLoader, optimizer: torch.optim, criterion: nn.CrossEntropyLoss, metrics: list[Metric], max_grad_norm: float=1.0, device: str=None):
     model = model.to(device)
