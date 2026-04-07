@@ -5,7 +5,7 @@ from molhiv.model import GCN
 from tqdm import tqdm
 from molhiv.utils import Metric
 
-def train(model: GCN, loader: DataLoader, optimizer:torch.optim, criterion: nn.CrossEntropyLoss, max_grad_norm: float = 1.0, device: str=None):
+def train(model: GCN, loader: DataLoader, optimizer:torch.optim, criterion: nn.CrossEntropyLoss, max_grad_norm: float = 1.0, device: str="cpu"):
     model.train()
     loss = 0
     total_sample = 0
@@ -24,7 +24,7 @@ def train(model: GCN, loader: DataLoader, optimizer:torch.optim, criterion: nn.C
     return loss
 
 @torch.no_grad()
-def val(model: GCN, loader: DataLoader, criterion: nn.CrossEntropyLoss, device: str=None):
+def val(model: GCN, loader: DataLoader, criterion: nn.CrossEntropyLoss, device: str="cpu"):
     loss = 0
     total_sample = 0
     model.eval()
@@ -39,7 +39,7 @@ def val(model: GCN, loader: DataLoader, criterion: nn.CrossEntropyLoss, device: 
     return loss
 
 @torch.no_grad()
-def predict(model: GCN, dataloader: DataLoader, device:str = None):
+def predict(model: GCN, dataloader: DataLoader, device:str = "cpu"):
     model.eval()
     outs = []
     ys = []
@@ -51,7 +51,7 @@ def predict(model: GCN, dataloader: DataLoader, device:str = None):
         ys.append(y)
     return torch.cat(outs, dim=0).cpu(), torch.cat(ys).cpu()
 
-def train_val(model: GCN, train_loader: DataLoader, val_loader: DataLoader, optimizer: torch.optim, criterion: nn.CrossEntropyLoss, metrics: list[Metric], max_grad_norm: float=1.0, device: str=None):
+def train_val(model: GCN, train_loader: DataLoader, val_loader: DataLoader, optimizer: torch.optim, criterion: nn.CrossEntropyLoss, metrics: list[Metric], max_grad_norm: float=1.0, device: str="cpu"):
     model = model.to(device)
     train_loss = train(model, train_loader, optimizer, criterion, max_grad_norm, device)
     val_loss = val(model, val_loader, criterion, device)
