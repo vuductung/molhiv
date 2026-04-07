@@ -72,7 +72,7 @@ criterion = nn.CrossEntropyLoss(weight=class_weights)
 import mlflow
 mlflow.set_tracking_uri(f"file://{os.path.expanduser('~')}/projects/molhiv/mlruns")
 mlflow.set_experiment("Molhiv-GCN-HIV-binding")
-with mlflow.start_run(run_name="testing-mps"):
+with mlflow.start_run(run_name="Training-GAT-GPUDEV"):
 
     mlflow.log_params(params)
 
