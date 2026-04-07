@@ -75,7 +75,7 @@ neg_counts, pos_counts = np.unique(sample_labels, return_counts=True)[1]
 pos_weight = torch.tensor([neg_counts / pos_counts], dtype=torch.float32).to(device)
 criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-    optimizer, mode="min", factore=0.5, patience=5, min_lr=1e-6
+    optimizer, mode="min", factor=0.5, patience=5, min_lr=1e-6
 )
 
 import mlflow
