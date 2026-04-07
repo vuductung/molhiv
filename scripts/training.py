@@ -19,6 +19,7 @@ params = {
     "Conv": "GATConv",
     "n_heads": 4,
     "add_self_loops": True,
+    "max_grad_norm":1
 }
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(device)
@@ -76,5 +77,5 @@ with mlflow.start_run(run_name="testing-mps"):
     mlflow.log_params(params)
 
     for epoch in range(params["epochs"]):
-        results = train_val(model, train_loader, val_loader, optimizer, criterion, metrics, device)
+        results = train_val(model, train_loader, val_loader, optimizer, criterion, metrics, params["max_grad_norm"], device)
         mlflow.log_metrics(results, step=epoch)
