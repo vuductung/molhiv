@@ -4,13 +4,14 @@ from molhiv.model import GATNN
 from molhiv.training import Metric, train_val
 import torch.nn as nn
 import os
+import numpy as np
 
 params = {
     "batch_size": 64,
     "datasize": 99999,
     "in_channel": 32,
     "hidden_channel": 256,
-    "out_channel": 2,
+    "out_channel": 1,
     "dropout": 0.2,
     "lr": 0.001,
     "weight_decay": 0.001,
@@ -21,6 +22,7 @@ params = {
     "add_self_loops": True,
     "max_grad_norm":1
 }
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(device)
 dataset = download_graph_prop_pred_dataset()
@@ -66,16 +68,15 @@ metrics = [
     Metric("train_roc_auc", fn=roc_auc, split="train"),
     Metric("val_roc_auc", fn=roc_auc, split="val")
 ]
-
-criterion = nn.CrossEntropyLoss(weight=class_weights)
+neg_counts, pos_counts = np.unique(sample_labels, return_counts=True)[1]
+pos_weight = round(neg_counts/pos_counts)
+criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
 import mlflow
 mlflow.set_tracking_uri(f"file://{os.path.expanduser('~')}/projects/molhiv/mlruns")
 mlflow.set_experiment("Molhiv-GCN-HIV-binding")
 with mlflow.start_run(run_name="Training-GAT-GPUDEV"):
-
     mlflow.log_params(params)
-
     for epoch in range(params["epochs"]):
         results = train_val(model, train_loader, val_loader, optimizer, criterion, metrics, params["max_grad_norm"], device)
         mlflow.log_metrics(results, step=epoch)

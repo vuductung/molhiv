@@ -25,11 +25,11 @@ def calculate_label_imbalance(y: torch.Tensor):
     return class_weights, sample_weights
 
 def acc(out:torch.Tensor, y: torch.Tensor):
-    out = torch.argmax(out, dim=1)
+    out = (torch.sigmoid(out.squeeze())>0.5).long()
     return (out == y).float().mean().item()
 
 def prec(out: torch.Tensor, y: torch.Tensor):
-    preds = torch.argmax(out, dim=1)
+    preds = (torch.sigmoid(out.squeeze())>0.5).long()
     pred_pos_mask = preds == 1
     if pred_pos_mask.float().sum() > 0:
         return (preds==y)[pred_pos_mask].float().mean().item()
@@ -37,12 +37,12 @@ def prec(out: torch.Tensor, y: torch.Tensor):
         return 0
 
 def rec(out: torch.Tensor, y: torch.Tensor):
-    preds = torch.argmax(out, dim=1)
+    preds = (torch.sigmoid(out.squeeze())>0.5).long()
     pos_classes = y == 1
     return (preds[pos_classes] == 1).float().mean().item()
 
 def roc_auc(outs: torch.Tensor, ys: torch.Tensor):
-    y_score = torch.softmax(outs, dim=1)[:, 1]
+    y_score = torch.sigmoid(outs)
     y_score = y_score.numpy()
     ys = ys.numpy()
     return roc_auc_score(ys, y_score)

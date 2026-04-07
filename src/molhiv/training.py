@@ -13,7 +13,7 @@ def train(model: GCN, loader: DataLoader, optimizer:torch.optim, criterion: nn.C
         optimizer.zero_grad()
         batch = batch.to(device)
         out = model(batch.x, batch.edge_index, batch.batch)
-        y = batch.y.flatten().to(device)
+        y = batch.y.float().squeeze().to(device)
         l = criterion(out, y)
         l.backward()
         nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
@@ -31,7 +31,7 @@ def val(model: GCN, loader: DataLoader, criterion: nn.CrossEntropyLoss, device: 
     for batch in loader:
         batch = batch.to(device)
         out = model(batch.x, batch.edge_index, batch.batch)
-        y = batch.y.flatten().to(device)
+        y = batch.y.float().squeeze().to(device)
         l = criterion(out, y)
         loss += (l.item()*batch.y.shape[0])
         total_sample += batch.y.shape[0]
@@ -47,7 +47,7 @@ def predict(model: GCN, dataloader: DataLoader, device:str = None):
         batch = batch.to(device)
         out = model(batch.x, batch.edge_index, batch.batch)
         outs.append(out)
-        y = batch.y.flatten().to(device)
+        y = batch.y.float().squeeze().to(device)
         ys.append(y)
     return torch.cat(outs, dim=0).cpu(), torch.cat(ys).cpu()
 
