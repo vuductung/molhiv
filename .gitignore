@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.egg-info/
+
+# Environment
+.env
+venv/
+
+# Data/model artifacts
+*.pt
+*.ckpt
+data/
+
+# MLflow
+mlruns/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
