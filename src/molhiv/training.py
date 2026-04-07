@@ -56,8 +56,8 @@ def train_val(model: GCN, train_loader: DataLoader, val_loader: DataLoader, opti
     train_loss = train(model, train_loader, optimizer, criterion, max_grad_norm, device)
     val_loss = val(model, val_loader, criterion, device)
     preds = {
-        "train": predict(model, train_loader),
-        "val": predict(model, val_loader)
+        "train": predict(model, train_loader, device),
+        "val": predict(model, val_loader, device)
         }
     result = {"train_loss": train_loss, "val_loss": val_loss}
     
