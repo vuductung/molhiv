@@ -1,6 +1,33 @@
+<<<<<<< HEAD
 [project]
 name = "molhiv"
 version = "0.1.0"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+=======
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "molhiv"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.0",
+    "torch_geometric",
+    "ogb",
+    "mlflow",
+    "scikit-learn",
+    "numpy",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "ruff",
+]
+>>>>>>> 2c242cc (Add initial testing notebook, project configuration, and training script)
