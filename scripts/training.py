@@ -20,7 +20,7 @@ params = {
     "Conv": "GATConv",
     "n_heads": 4,
     "add_self_loops": True,
-    "max_grad_norm":1
+    "max_grad_norm":1,
 }
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -69,13 +69,13 @@ metrics = [
     Metric("val_roc_auc", fn=roc_auc, split="val")
 ]
 neg_counts, pos_counts = np.unique(sample_labels, return_counts=True)[1]
-pos_weight = round(neg_counts/pos_counts)
+pos_weight = torch.tensor([neg_counts / pos_counts], dtype=torch.float32).to(device)
 criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
 import mlflow
 mlflow.set_tracking_uri(f"file://{os.path.expanduser('~')}/projects/molhiv/mlruns")
 mlflow.set_experiment("Molhiv-GCN-HIV-binding")
-with mlflow.start_run(run_name="Training-GAT-GPUDEV"):
+with mlflow.start_run(run_name="Training-GAT-GPUDEV-BCELoss"):
     mlflow.log_params(params)
     for epoch in range(params["epochs"]):
         results = train_val(model, train_loader, val_loader, optimizer, criterion, metrics, params["max_grad_norm"], device)
