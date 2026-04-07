@@ -12,6 +12,7 @@ venv/
 *.ckpt
 data/
 logs/
+mlruns/
 
 # MLflow
 mlruns/

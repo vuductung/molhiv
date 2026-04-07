@@ -3,6 +3,7 @@ from molhiv.utils import calculate_label_imbalance, prec, acc, rec, roc_auc, dow
 from molhiv.model import GATNN
 from molhiv.training import Metric, train_val
 import torch.nn as nn
+import os
 
 params = {
     "batch_size": 64,
@@ -68,7 +69,7 @@ metrics = [
 criterion = nn.CrossEntropyLoss(weight=class_weights)
 
 import mlflow
-mlflow.set_tracking_uri("file:///home/dtvu/projects/molhiv/mlruns")
+mlflow.set_tracking_uri(f"file://{os.path.expanduser('~')}/projects/molhiv/mlruns")
 mlflow.set_experiment("Molhiv-GCN-HIV-binding")
 with mlflow.start_run(run_name="testing-mps"):
 
