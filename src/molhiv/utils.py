@@ -6,12 +6,20 @@ from sklearn.metrics import roc_auc_score
 from dataclasses import dataclass, field
 from typing import Callable
 
+<<<<<<< HEAD
 def download_graph_prop_pred_dataset():
+=======
+def download_graph_prop_pred_dataset(root="../data"):
+>>>>>>> 24945ca (Add core model, training functions, and utility methods for graph property prediction)
     # Patch torch.load to use weights_only=False (safe for OGB's trusted data)
     _original_load = torch.load
 
     torch.load = lambda *args, **kwargs: _original_load(*args, **{**kwargs, "weights_only": False})
+<<<<<<< HEAD
     dataset = PygGraphPropPredDataset(root="/tmp/ogb.molhiv", name="ogbg-molhiv")
+=======
+    dataset = PygGraphPropPredDataset(root=root, name="ogbg-molhiv")
+>>>>>>> 24945ca (Add core model, training functions, and utility methods for graph property prediction)
 
     # Restore original behavior
     torch.load = _original_load
