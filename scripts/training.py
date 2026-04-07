@@ -88,7 +88,7 @@ with mlflow.start_run(run_name="Training-GAT-GPUDEV-BCELoss"):
         mlflow.log_metrics(results, step=epoch)
     
     scheduler.step(results["val_loss"])
-    mlflow.log_param("lr_per_epoch", scheduler.optimizer.param_groups[0]["lr"], step="epoch")
+    mlflow.log_metric("lr_per_epoch", scheduler.optimizer.param_groups[0]["lr"], step=epoch)
 
     prob, y_true = predict(model, test_loader, "cpu")
 
