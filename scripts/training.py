@@ -76,5 +76,5 @@ with mlflow.start_run(run_name="testing-mps"):
     mlflow.log_params(params)
 
     for epoch in range(params["epochs"]):
-        results = train_val(model, train_loader, val_loader, optimizer, criterion, metrics)
+        results = train_val(model, train_loader, val_loader, optimizer, criterion, metrics, device)
         mlflow.log_metrics(results, step=epoch)
