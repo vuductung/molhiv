@@ -7,7 +7,7 @@ import os
 
 params = {
     "batch_size": 64,
-    "datasize": 100,
+    "datasize": 99999,
     "in_channel": 32,
     "hidden_channel": 256,
     "out_channel": 2,
