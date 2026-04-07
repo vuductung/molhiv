@@ -5,6 +5,7 @@ from molhiv.training import Metric, train_val
 import torch.nn as nn
 import os
 import numpy as np
+from molhiv.training import predict
 
 params = {
     "batch_size": 64,
@@ -12,7 +13,7 @@ params = {
     "in_channel": 32,
     "hidden_channel": 256,
     "out_channel": 1,
-    "dropout": 0.2,
+    "dropout": 0.5,
     "lr": 0.001,
     "weight_decay": 0.001,
     "epochs": 50,
@@ -34,6 +35,7 @@ size = params["datasize"]
 
 train_dataset = dataset[split_idx["train"]][:size]
 val_dataset = dataset[split_idx["valid"]][:size]
+test_dataset = dataset[split_idx["test"]]
 
 sample_labels = [dataset[i].y.squeeze() for i in range(len(train_dataset))]
 class_weights, sample_weights = calculate_label_imbalance(sample_labels)
@@ -44,6 +46,7 @@ sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_w
 
 train_loader = DataLoader(train_dataset, batch_size=params["batch_size"], sampler=sampler)
 val_loader = DataLoader(val_dataset, batch_size=params["batch_size"])
+test_loader = DataLoader(test_dataset, batch_size=params["batch_size"])
 
 model = GATNN(
     params["in_channel"],
@@ -71,6 +74,9 @@ metrics = [
 neg_counts, pos_counts = np.unique(sample_labels, return_counts=True)[1]
 pos_weight = torch.tensor([neg_counts / pos_counts], dtype=torch.float32).to(device)
 criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer, mode="min", factore=0.5, patience=5, min_lr=1e-6
+)
 
 import mlflow
 mlflow.set_tracking_uri(f"file://{os.path.expanduser('~')}/projects/molhiv/mlruns")
@@ -80,3 +86,11 @@ with mlflow.start_run(run_name="Training-GAT-GPUDEV-BCELoss"):
     for epoch in range(params["epochs"]):
         results = train_val(model, train_loader, val_loader, optimizer, criterion, metrics, params["max_grad_norm"], device)
         mlflow.log_metrics(results, step=epoch)
+    
+    scheduler.step(results["val_loss"])
+    mlflow.log_param("lr_per_epoch", scheduler.optimizer.param_groups[0]["lr"], step="epoch")
+
+    prob, y_true = predict(model, test_loader, "cpu")
+
+    test_roc_auc = roc_auc(prob[:, 1], y_true)
+    mlflow.log_metric("test_roc_auc", test_roc_auc)
