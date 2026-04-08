@@ -90,7 +90,7 @@ with mlflow.start_run(run_name="Training-GAT-GPUDEV-BCELoss"):
         scheduler.step(results["val_loss"])
         mlflow.log_metric("lr_per_epoch", scheduler.optimizer.param_groups[0]["lr"], step=epoch)
 
-    prob, y_true = predict(model, test_loader, "cpu")
+    prob, y_true = predict(model, test_loader, device)
 
     test_roc_auc = roc_auc(prob[:, 1], y_true)
     mlflow.log_metric("test_roc_auc", test_roc_auc)
