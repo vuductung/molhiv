@@ -2,7 +2,7 @@
 
 #SBATCH -J molhiv_train          # Job name (shows up in squeue)
 #SBATCH -p gpudev                   # Partition - gpu1 for single node jobs
-#SBATCH --gres=gpu:a100:1         # Request 1 A100 GPU
+#SBATCH --gres=gpu:a100:1 2       # Request 1 A100 GPU
 #SBATCH --cpus-per-task=36        # CPUs (gpu1 default is 36 per GPU)
 #SBATCH --mem=125000              # Memory in MB (~125 GB, gpu1 default)
 #SBATCH --time=00:15:00         # Max walltime - job gets killed after this
