@@ -13,6 +13,7 @@ venv/
 data/
 logs/
 mlruns/
+nbs/
 
 # MLflow
 mlruns/
