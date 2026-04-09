@@ -4,33 +4,6 @@ import torch.nn as nn
 from torch_geometric.nn import global_mean_pool
 from ogb.graphproppred.mol_encoder import AtomEncoder
 
-class GCN(nn.Module):
-    def __init__(self, in_channels: int, hidden_channels: int, out_channels: int, p: float):
-        super().__init__()
-
-        self.encoder = AtomEncoder(emb_dim=in_channels)
-        self.conv_in = GCNConv(in_channels, hidden_channels, add_self_loops=True, normalize=True)
-        self.conv_out = GCNConv(hidden_channels, hidden_channels, add_self_loops=True, normalize=True)
-        self.dropout = nn.Dropout(p)
-        self.relu = nn.ReLU()
-        self.mlp = nn.Sequential(
-            nn.Linear(hidden_channels, hidden_channels),
-            nn.ReLU(),
-            nn.Dropout(p),
-            nn.Linear(hidden_channels, out_channels),
-        )
-
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor, batch: int=None):
-        out = self.encoder(x)
-        out = self.conv_in(out, edge_index)
-        out = self.relu(out)
-        out = self.dropout(out)
-
-        out = self.conv_out(out, edge_index)
-        out = self.relu(out)
-        out = self.dropout(out)
-        out = global_mean_pool(out, batch)
-        return self.mlp(out)
 
 class GATNN(nn.Module):
     def __init__(self, in_channels: int, hidden_channels: int, out_channels: int, heads: int, dropout: float, add_self_loops: bool):
