@@ -4,10 +4,10 @@ data:
   batch_size: 128
 
 model:
-  hidden_channels: 512
+  hidden_channels: 1024
   out_channels: 1
   p: 0.3
-  num_layers: 8
+  num_layers: 12
 
 optimizer:
   lr: 0.001
