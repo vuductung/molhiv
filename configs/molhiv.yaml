@@ -6,7 +6,7 @@ data:
 model:
   hidden_channels: 512
   out_channels: 1
-  p: 0.2
+  p: 0.3
   num_layers: 8
 
 optimizer:
