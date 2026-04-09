@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch_geometric.nn import GINEConv
 from torch_geometric.data import Data
-from torch_geometric.nn import global_mean_pool
+from torch_geometric.nn import global_mean_pool, global_max_pool
 from ogb.graphproppred.mol_encoder import AtomEncoder, BondEncoder
 
 class GINENN(nn.Module):
@@ -25,7 +25,12 @@ class GINENN(nn.Module):
             self.bns.append(bn)
 
         self.dropout = nn.Dropout(p)
-        self.classifier = nn.Linear(hidden_channels, out_channels)
+        self.classifier = nn.Sequential(
+            nn.Linear(2*hidden_channels, hidden_channels),
+            nn.ReLU(),
+            nn.Dropout(p),
+            nn.Linear(hidden_channels, out_channels)
+        )
 
     def forward(self, data: Data):
         x, edge_index, edge_attr, batch = (data.x, data.edge_index, data.edge_attr, data.batch)
@@ -34,11 +39,11 @@ class GINENN(nn.Module):
         edge_attr = self.bond_encoder(edge_attr)
         
         for conv, bn in zip(self.convs, self.bns):
-            x = conv(x, edge_index, edge_attr).relu()
+            x = (conv(x, edge_index, edge_attr) + x).relu()
             x = bn(x)
             x = self.dropout(x)
 
-        x = global_mean_pool(x, batch)
+        x = torch.cat([global_mean_pool(x, batch), global_max_pool(x, batch)], dim=1)
         return self.classifier(x)
 
     def make_gin_nn_module(self):
