@@ -1,13 +1,13 @@
 data:
   datasetname: ogbg-molhiv
-  datasize: 200
+  datasize: 99999
   batch_size: 64
 
 model:
   hidden_channels: 256
   out_channels: 1
   p: 0.1
-  num_layers: 2
+  num_layers: 4
 
 optimizer:
   lr: 0.001
