@@ -8,6 +8,7 @@ from molhiv.training import predict
 import yaml
 import argparse
 from pathlib import Path
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--run_name", type=str, default="Model training")
@@ -87,7 +88,7 @@ with mlflow.start_run(run_name=args.run_name):
     mlflow.log_params(cfg["cosine_annealing_scheduler"])
     mlflow.log_params(cfg["training"])
 
-    for epoch in range(cfg["training"]["epochs"]):
+    for epoch in tqdm(range(cfg["training"]["epochs"])):
         results = train_val(model, train_loader, val_loader, optimizer, criterion, metrics, cfg["training"]["max_grad_norm"], device)
         mlflow.log_metrics(results, step=epoch)
     
