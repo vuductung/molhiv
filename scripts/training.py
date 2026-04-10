@@ -48,12 +48,12 @@ class_weights = class_weights.to(device)
 from torch.utils.data import WeightedRandomSampler
 sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)
 
-train_loader = DataLoader(train_dataset, batch_size=cfg["data"]["batch_size"], sampler=sampler)
+train_loader = DataLoader(train_dataset, batch_size=cfg["data"]["batch_size"])
 val_loader = DataLoader(val_dataset, batch_size=cfg["data"]["batch_size"])
 test_loader = DataLoader(test_dataset, batch_size=cfg["data"]["batch_size"])
 
 model = GINENN(**cfg["model"])
-optimizer = torch.optim.Adam(model.parameters(), lr=cfg["optimizer"]["lr"], weight_decay=cfg["optimizer"]["weight_decay"])
+optimizer = torch.optim.AdamW(model.parameters(), lr=cfg["optimizer"]["lr"], weight_decay=cfg["optimizer"]["weight_decay"])
 
 metrics = [
     Metric("train_prec", fn=prec, split="train"),
