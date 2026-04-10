@@ -9,6 +9,7 @@ import yaml
 import argparse
 from pathlib import Path
 from tqdm import tqdm
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--run_name", type=str, default="Model training")
