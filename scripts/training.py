@@ -71,8 +71,8 @@ metrics = [
 neg_counts, pos_counts = np.unique(sample_labels, return_counts=True)[1]
 pos_weight = torch.tensor([neg_counts / pos_counts], dtype=torch.float32).to(device)
 criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-    optimizer, **cfg["cosine_annealing_scheduler"]
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer, **cfg["reduce_on_plateau_scheduler"]
 )
 
 import mlflow

@@ -6,12 +6,12 @@ data:
 model:
   hidden_channels: 128
   out_channels: 1
-  p: 0.3
+  p: 0.5
   num_layers: 3
 
 optimizer:
-  lr: 0.001
-  weight_decay: 0.001
+  lr: 0.0005
+  weight_decay: 0.005
 
 training:
   epochs: 50
