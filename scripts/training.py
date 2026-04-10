@@ -93,7 +93,7 @@ with mlflow.start_run(run_name=args.run_name):
         results = train_val(model, train_loader, val_loader, optimizer, criterion, metrics, cfg["training"]["max_grad_norm"], device)
         mlflow.log_metrics(results, step=epoch)
     
-        scheduler.step()
+        scheduler.step(results["val_loss"])
         mlflow.log_metric("lr_per_epoch", scheduler.optimizer.param_groups[0]["lr"], step=epoch)
 
     prob, y_true = predict(model, test_loader, device)
