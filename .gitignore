@@ -16,7 +16,7 @@ mlruns/
 nbs/
 
 # MLflow
-mlruns/
+mlflow.db
 
 # IDE
 .vscode/
