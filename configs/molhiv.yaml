@@ -1,7 +1,7 @@
 data:
   datasetname: ogbg-molhiv
   datasize: 99999
-  batch_size: 64
+  batch_size: 32
 
 model:
   hidden_channels: 32
