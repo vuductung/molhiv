@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.metrics import roc_auc_score
 from dataclasses import dataclass, field
 from typing import Callable
+from ogb.graphproppred import Evaluator
 
 def download_graph_prop_pred_dataset(root="../data"):
     # Patch torch.load to use weights_only=False (safe for OGB's trusted data)
@@ -42,10 +43,10 @@ def rec(out: torch.Tensor, y: torch.Tensor):
     return (preds[pos_classes] == 1).float().mean().item()
 
 def roc_auc(outs: torch.Tensor, ys: torch.Tensor):
-    y_score = torch.sigmoid(outs)
+    y_score = torch.sigmoid(outs).unsqueeze(-1)
     y_score = y_score.numpy()
-    ys = ys.numpy()
-    return roc_auc_score(ys, y_score)
+    ys = ys.unsqueeze(-1).numpy()
+    return Evaluator(name="ogbg-molhiv").eval({"y_true": ys, 'y_pred': y_score})["rocauc"]
 
 @dataclass
 class Metric:

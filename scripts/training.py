@@ -3,13 +3,28 @@ from molhiv.utils import calculate_label_imbalance, prec, acc, rec, roc_auc, dow
 from molhiv.ginenn import GINENN
 from molhiv.training import Metric, train_val
 import torch.nn as nn
-import os
 import numpy as np
 from molhiv.training import predict
 import yaml
+import argparse
+from pathlib import Path
 
-with open("../configs/molhiv.yaml") as f:
+parser = argparse.ArgumentParser()
+parser.add_argument("--run_name", type=str, default="Model training")
+parser.add_argument("--epochs", type=int, default=None)
+parser.add_argument("--datasize", type=int, default=None)
+args = parser.parse_args()
+
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+conifg_path = SCRIPT_DIR / "../configs/molhiv.yaml"
+with open(conifg_path) as f:
     cfg = yaml.safe_load(f)
+
+if args.epochs is not None:
+    cfg["training"]["epochs"] = args.epochs
+if args.datasize is not None:
+    cfg["data"]["datasize"] = args.datasize
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(device)
@@ -54,26 +69,29 @@ metrics = [
 neg_counts, pos_counts = np.unique(sample_labels, return_counts=True)[1]
 pos_weight = torch.tensor([neg_counts / pos_counts], dtype=torch.float32).to(device)
 criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-    optimizer, **cfg["scheduler"]
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+    optimizer, **cfg["cosine_annealing_scheduler"]
 )
 
 import mlflow
-mlflow.set_tracking_uri(f"file://{os.path.expanduser('~')}/projects/molhiv/mlruns")
-# mlflow.set_tracking_uri("http://127.0.0.1:5000")
+if device == "cuda":
+    mlflow.set_tracking_uri(f"file://{os.path.expanduser('~')}/projects/molhiv/mlruns")
+else:
+    mlflow.set_tracking_uri("http://127.0.0.1:5000")
+
 mlflow.set_experiment("Molhiv-GCN-HIV-binding")
-with mlflow.start_run(run_name="Overfitting-testing"):
+with mlflow.start_run(run_name=args.run_name):
     mlflow.log_params(cfg["data"])
     mlflow.log_params(cfg["model"])
     mlflow.log_params(cfg["optimizer"])
-    mlflow.log_params(cfg["scheduler"])
+    mlflow.log_params(cfg["cosine_annealing_scheduler"])
     mlflow.log_params(cfg["training"])
 
     for epoch in range(cfg["training"]["epochs"]):
         results = train_val(model, train_loader, val_loader, optimizer, criterion, metrics, cfg["training"]["max_grad_norm"], device)
         mlflow.log_metrics(results, step=epoch)
     
-        scheduler.step(results["val_loss"])
+        scheduler.step()
         mlflow.log_metric("lr_per_epoch", scheduler.optimizer.param_groups[0]["lr"], step=epoch)
 
     prob, y_true = predict(model, test_loader, device)
