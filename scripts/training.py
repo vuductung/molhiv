@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--run_name", type=str, default="Model training")
 parser.add_argument("--epochs", type=int, default=None)
 parser.add_argument("--datasize", type=int, default=None)
+parser.add_argument("--model_name", type=str)
 args = parser.parse_args()
 
 
@@ -81,6 +82,9 @@ if device == "cuda":
 else:
     mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
+checkpoint_path = SCRIPT_DIR / f"../checkpoints/{args.model_name}.pt"
+checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+
 mlflow.set_experiment("Molhiv-GCN-HIV-binding")
 with mlflow.start_run(run_name=args.run_name):
     mlflow.log_params(cfg["data"])
@@ -89,6 +93,9 @@ with mlflow.start_run(run_name=args.run_name):
     mlflow.log_params(cfg["cosine_annealing_scheduler"])
     mlflow.log_params(cfg["training"])
 
+    best_val_roc_auc = 0
+    patience_counter = 0
+
     for epoch in tqdm(range(cfg["training"]["epochs"])):
         results = train_val(model, train_loader, val_loader, optimizer, criterion, metrics, cfg["training"]["max_grad_norm"], device)
         mlflow.log_metrics(results, step=epoch)
@@ -96,6 +103,23 @@ with mlflow.start_run(run_name=args.run_name):
         scheduler.step(results["val_loss"])
         mlflow.log_metric("lr_per_epoch", scheduler.optimizer.param_groups[0]["lr"], step=epoch)
 
+        if results["val_roc_auc"] > best_val_roc_auc:
+            best_val_roc_auc = results["val_roc_auc"]
+            patience_counter = 0
+
+            torch.save({
+                "epoch": epoch,
+                "model_state_dict": model.state_dict(),
+                "optimizer": optimizer.state_dict(),
+                "val_roc_auc": results["val_roc_auc"],
+                "slurm_job_id": os.environ.get("SLURM_JOB_ID", "local"),
+                "config": cfg,
+            }, checkpoint_path)
+        else:
+            patience_counter += 1
+            if patience_counter == cfg["training"]["patience"]
+            print(f"Early stopping at epoch {epoch}.")
+            break
     prob, y_true = predict(model, test_loader, device)
 
     test_roc_auc = roc_auc(prob, y_true)
