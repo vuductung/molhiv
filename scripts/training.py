@@ -117,9 +117,9 @@ with mlflow.start_run(run_name=args.run_name):
             }, checkpoint_path)
         else:
             patience_counter += 1
-            if patience_counter == cfg["training"]["patience"]
-            print(f"Early stopping at epoch {epoch}.")
-            break
+            if patience_counter == cfg["training"]["patience"]:
+                print(f"Early stopping at epoch {epoch}.")
+                break
     prob, y_true = predict(model, test_loader, device)
 
     test_roc_auc = roc_auc(prob, y_true)
