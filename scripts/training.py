@@ -96,7 +96,7 @@ with mlflow.start_run(run_name=args.run_name):
     best_val_roc_auc = 0
     patience_counter = 0
 
-    for epoch in tqdm(range(cfg["training"]["epochs"])):
+    for epoch in range(cfg["training"]["epochs"]):
         results = train_val(model, train_loader, val_loader, optimizer, criterion, metrics, cfg["training"]["max_grad_norm"], device)
         mlflow.log_metrics(results, step=epoch)
     
