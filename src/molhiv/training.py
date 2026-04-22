@@ -11,7 +11,7 @@ def train(model: nn.Module, loader: DataLoader, optimizer:torch.optim, criterion
     for batch in loader:
         optimizer.zero_grad()
         batch = batch.to(device)
-        out = model(batch).squeeze(-1)
+        out = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr).squeeze(-1)
         y = batch.y.float().squeeze().to(device)
         l = criterion(out, y)
         l.backward()
@@ -29,7 +29,7 @@ def val(model: nn.Module, loader: DataLoader, criterion: nn.CrossEntropyLoss, de
     model.eval()
     for batch in loader:
         batch = batch.to(device)
-        out = model(batch).squeeze(-1)
+        out = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr).squeeze(-1)
         y = batch.y.float().squeeze().to(device)
         l = criterion(out, y)
         loss += (l.item()*batch.y.shape[0])
@@ -44,7 +44,7 @@ def predict(model: nn.Module, dataloader: DataLoader, device:str = "cpu"):
     ys = []
     for batch in dataloader:
         batch = batch.to(device)
-        out = model(batch).squeeze(-1)
+        out = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr).squeeze(-1)
         outs.append(out)
         y = batch.y.float().squeeze().to(device)
         ys.append(y)
