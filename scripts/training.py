@@ -49,7 +49,7 @@ class_weights = class_weights.to(device)
 from torch.utils.data import WeightedRandomSampler
 sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)
 
-train_loader = DataLoader(train_dataset, batch_size=cfg["data"]["batch_size"])
+train_loader = DataLoader(train_dataset, batch_size=cfg["data"]["batch_size"], sampler=sampler)
 val_loader = DataLoader(val_dataset, batch_size=cfg["data"]["batch_size"])
 test_loader = DataLoader(test_dataset, batch_size=cfg["data"]["batch_size"])
 
@@ -90,7 +90,6 @@ with mlflow.start_run(run_name=args.run_name):
     mlflow.log_params(cfg["data"])
     mlflow.log_params(cfg["model"])
     mlflow.log_params(cfg["optimizer"])
-    mlflow.log_params(cfg["reduce_on_plateau_scheduler"])
     mlflow.log_params(cfg["training"])
 
     best_val_roc_auc = 0
