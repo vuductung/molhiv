@@ -32,8 +32,7 @@ class GINENN(nn.Module):
             nn.Linear(hidden_channels, out_channels)
         )
 
-    def forward(self, data: Data):
-        x, edge_index, edge_attr, batch = (data.x, data.edge_index, data.edge_attr, data.batch)
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor, batch: torch.Tensor, edge_attr: torch.Tensor):
 
         x = self.atom_encoder(x)
         edge_attr = self.bond_encoder(edge_attr)
