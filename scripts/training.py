@@ -39,10 +39,10 @@ from torch_geometric.loader import DataLoader
 size = cfg["data"]["datasize"]
 
 train_dataset = dataset[split_idx["train"]][:size]
-val_dataset = dataset[split_idx["valid"]][:size]
+val_dataset = dataset[split_idx["valid"]]
 test_dataset = dataset[split_idx["test"]]
 
-sample_labels = [dataset[i].y.squeeze() for i in range(len(train_dataset))]
+sample_labels = [train_dataset[i].y.squeeze() for i in range(len(train_dataset))]
 class_weights, sample_weights = calculate_label_imbalance(sample_labels)
 class_weights = class_weights.to(device)
 
@@ -71,7 +71,7 @@ metrics = [
 ]
 neg_counts, pos_counts = np.unique(sample_labels, return_counts=True)[1]
 pos_weight = torch.tensor([neg_counts / pos_counts], dtype=torch.float32).to(device)
-criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+criterion = nn.BCEWithLogitsLoss(pos_weight=None)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer, **cfg["reduce_on_plateau_scheduler"]
 )
@@ -90,7 +90,7 @@ with mlflow.start_run(run_name=args.run_name):
     mlflow.log_params(cfg["data"])
     mlflow.log_params(cfg["model"])
     mlflow.log_params(cfg["optimizer"])
-    mlflow.log_params(cfg["cosine_annealing_scheduler"])
+    mlflow.log_params(cfg["reduce_on_plateau_scheduler"])
     mlflow.log_params(cfg["training"])
 
     best_val_roc_auc = 0
@@ -120,7 +120,9 @@ with mlflow.start_run(run_name=args.run_name):
             if patience_counter == cfg["training"]["patience"]:
                 print(f"Early stopping at epoch {epoch}.")
                 break
-    prob, y_true = predict(model, test_loader, device)
 
+    ckpt = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(ckpt["model_state_dict"])
+    prob, y_true = predict(model, test_loader, device)
     test_roc_auc = roc_auc(prob, y_true)
     mlflow.log_metric("test_roc_auc", test_roc_auc)
